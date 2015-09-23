@@ -1,14 +1,16 @@
 require 'data_mapper'
-require 'bcrypt'
 require 'dm-postgres-adapter'
+require 'dm-serializer'
 
-DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/ccdb')
+DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/camdev')
 
 class Entry
   include DataMapper::Resource
-  include BCrypt
 
   property :id, Serial
   property :datestamp, DateTime
-  property :message, BCryptHash
+  property :message, Text
 end
+
+DataMapper.finalize
+DataMapper.auto_upgrade!

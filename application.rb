@@ -1,13 +1,20 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'sinatra/base'
+require 'sinatra/json'
+require 'pry'
+
+require './model'
 
 class CammyCorner < Sinatra::Application
+
   post '/entry' do
-    # not shit
+    Entry.create(:message => params['message'] , :datestamp => Time.new)
   end
 
-  get '/entries' do
-    'hi'
+  delete '/entries' do
+    entries = Entry.all.to_json
+    Entry.all.destroy
+    json entries
   end
 end
