@@ -1,3 +1,4 @@
+#! /bin/ruby
 # Note Queue Send Client: Ruby program to send messages to NoteQueue, a simple server intended to multiplex journal entries from various devices into a single destination.
 # Author: Cameron Carroll, September 2015
 # Required Gems: curb
@@ -26,5 +27,5 @@ else
   File.delete TEMPFILE
 end
 
-http = Curl.post("localhost:9393/entry", {:message => input})
+http = Curl.post("cammycorner.herokuapp.com/entry", {:message => input})
 puts http.body_str

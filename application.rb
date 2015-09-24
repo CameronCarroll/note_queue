@@ -2,7 +2,6 @@ require 'rubygems'
 require 'bundler/setup'
 require 'sinatra/base'
 require 'sinatra/json'
-require 'pry'
 
 require './model'
 
