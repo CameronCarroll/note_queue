@@ -9,7 +9,7 @@ class Entry
 
   property :id, Serial
   property :datestamp, DateTime
-  property :message, String
+  property :message, Text, :lazy => false
 end
 
 DataMapper.finalize

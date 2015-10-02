@@ -7,10 +7,13 @@ require 'curb'
 require 'json'
 require 'time'
 
+#SERVER = "localhost:9393/entries"
+SERVER = "cammycorner.herokuapp.com/entries"
+
 DOC_DIRECTORY = '/home/cameron/docs/write_everyday2/'
 Dir.mkdir(DOC_DIRECTORY) unless Dir.exists?(DOC_DIRECTORY)
 
-json = Curl.delete('cammycorner.herokuapp.com/entries')
+json = Curl.delete(SERVER)
 data = JSON.parse(json.body_str)
 data.each do |datum|
   date = Time.parse(datum['datestamp']).getlocal

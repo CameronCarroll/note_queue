@@ -3,6 +3,9 @@
 # Author: Cameron Carroll, September 2015
 # Required Gems: curb
 
+#SERVER = "localhost:9393/entry"
+SERVER = "cammycorner.herokuapp.com/entry"
+
 require 'curb'
 
 if ARGV.length > 0
@@ -27,5 +30,5 @@ else
   File.delete TEMPFILE
 end
 
-http = Curl.post("cammycorner.herokuapp.com/entry", {:message => input})
+http = Curl.post(SERVER, {:message => input})
 puts http.body_str
