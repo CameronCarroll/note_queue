@@ -1,3 +1,3 @@
 require './application'
 
-run CammyCorner
+run NoteQueue
