@@ -3,7 +3,6 @@
 # Author: Cameron Carroll, September 2015
 # Required Gems: curb
 
-#SERVER = "localhost:9393/entry"
 SERVER = "cammycorner.herokuapp.com/entry"
 
 require 'curb'
@@ -31,4 +30,4 @@ else
 end
 
 http = Curl.post(SERVER, {:message => input})
-puts http.body_str
+puts http.status

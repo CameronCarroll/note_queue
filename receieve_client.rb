@@ -6,11 +6,11 @@
 require 'curb'
 require 'json'
 require 'time'
+require 'dir'
 
-#SERVER = "localhost:9393/entries"
 SERVER = "cammycorner.herokuapp.com/entries"
+DOC_DIRECTORY = Dir.home + '/journal'
 
-DOC_DIRECTORY = '/home/cameron/docs/write_everyday2/'
 Dir.mkdir(DOC_DIRECTORY) unless Dir.exists?(DOC_DIRECTORY)
 
 json = Curl.delete(SERVER)
