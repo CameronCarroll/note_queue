@@ -3,7 +3,7 @@ require 'dm-postgres-adapter'
 require 'dm-serializer'
 require 'bcrypt'
 
-DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/camdev')
+DataMapper.setup(:default, ENV['DATABASE_URL'] || 'postgres://localhost/nq_dev')
 
 class Entry
   include DataMapper::Resource
@@ -22,6 +22,8 @@ class User
   property :id, Serial
   property :login, String, :length => 3..50
   property :password, BCryptHash
+  property :api_key, String
+  property :api_secret, String
 
   has n, :entries
 

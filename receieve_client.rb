@@ -6,9 +6,10 @@
 require 'curb'
 require 'json'
 require 'time'
-require 'dir'
+require_relative 'keylib'
 
-SERVER = "cammycorner.herokuapp.com/entries"
+SERVER = "localhost:9393/entries"
+#SERVER = "cammycorner.herokuapp.com/entries"
 DOC_DIRECTORY = Dir.home + '/journal'
 
 Dir.mkdir(DOC_DIRECTORY) unless Dir.exists?(DOC_DIRECTORY)
