@@ -5,6 +5,7 @@ require 'sinatra/json'
 require 'sinatra/flash'
 require 'warden'
 require 'tilt/erb'
+require 'securerandom'
 require 'pry'
 
 require './model'
@@ -78,8 +79,9 @@ class NoteQueue < Sinatra::Application
       redirect '/register'
     else
       if password == confirmation
-        user = User.create(:login => login, :password => password)
-        binding.pry
+        api_key = SecureRandom.urlsafe_base64
+        api_secret = SecureRandom.urlsafe_base64
+        user = User.create(:login => login, :password => password, :api_key => api_key, :api_secret => api_secret)
         env['warden'].set_user(user)
         redirect '/dash'
       else
@@ -93,6 +95,7 @@ class NoteQueue < Sinatra::Application
   # Program API Routes:
 
   post '/entry' do
+    authenticate
     stamp = Time.new
     message = params['message']
     result = Entry.create(:message => message , :datestamp => stamp)
@@ -104,6 +107,7 @@ class NoteQueue < Sinatra::Application
   end
 
   delete '/entries' do
+    authenticate
     entries = Entry.all
     Entry.all.destroy
     json entries
@@ -119,7 +123,16 @@ class NoteQueue < Sinatra::Application
   end
 
   get '/register' do
+    bump_logged_in
     erb :create_account
+  end
+
+  get '/dash' do
+    bump_logged_out
+    user = env['warden'].user
+    @api_key = user.api_key
+    @api_secret = user.api_secret
+    erb :dash
   end
 
 
@@ -143,5 +156,26 @@ class NoteQueue < Sinatra::Application
 
   def bump_logged_out
     redirect '/' if logged_out?
+  end
+
+  def authenticate
+    header = env["HTTP_AUTHORIZATION"]
+    if header
+      header = header.split(':')
+      header[1].sub!(' ', '')
+      key = header[1]
+      hmac_message = header[2]
+      user = User.first(api_key: key)
+      secret = user.api_secret
+      uri = env['REQUEST_URI']
+      text = params['text']
+      computed_hmac = OpenSSL::HMAC.hexdigest('SHA256', secret, uri + text)
+      unless hmac_message == computed_hmac
+        return 401
+      end
+      binding.pry
+    else
+      return 401
+    end
   end
 end
