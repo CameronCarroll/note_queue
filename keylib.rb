@@ -23,10 +23,10 @@ module NQKeylib
     puts "I couldn't find your API key/ID and your secret."
     puts "Please copy the key off of the website and paste it here..."
     print "API KEY: "
-    @@key = gets.chomp
+    @@key = $stdin.gets.chomp
     puts "Thanks, now please copy the secret off of the website and paste it here..."
     print "SECRET: "
-    @@secret = gets.chomp
+    @@secret = $stdin.gets.chomp
     save_keys
   end
 
