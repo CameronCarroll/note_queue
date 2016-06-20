@@ -97,10 +97,14 @@ class NoteQueue < Sinatra::Application
   post '/entry' do
     authenticate
     stamp = Time.new
-    message = params['message']
-    result = Entry.create(:message => message , :datestamp => stamp)
-    if result
-      return 200
+    # Message comes through with spaces on either side, remove them:
+    message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
+    # We need user ID:
+    user_id = env['warden'].user.id
+    # I was having a lot of trouble here, where it just refused to create the record, but it seems I forgot to hook up the user_id, and because it belongs to a user it was failing.
+    result = Entry.create(:message => message , :datestamp => stamp, :user_id => user_id)
+    if result.id
+      return 201
     else
       return 500
     end
@@ -108,9 +112,11 @@ class NoteQueue < Sinatra::Application
 
   delete '/entries' do
     authenticate
-    entries = Entry.all
+    user = env['warden'].user
+    entries = Entry.all(:user_id => user.id)
+    json_string = json(entries)
     Entry.all.destroy
-    json entries
+    json_string
   end
 
   #############################################################################
@@ -159,23 +165,31 @@ class NoteQueue < Sinatra::Application
   end
 
   def authenticate
+    # Get HTTP_AUTHORIZATION header
+    # This is set up by the client's request
     header = env["HTTP_AUTHORIZATION"]
     if header
+      # Header in format "Authorization: {key}:{secret}"
       header = header.split(':')
+      # Not sure if I should have done this in client instead, clearing out extra spaces from API Key
       header[1].sub!(' ', '')
       key = header[1]
       hmac_message = header[2]
       user = User.first(api_key: key)
       secret = user.api_secret
       uri = env['REQUEST_URI']
-      text = params['text']
-      computed_hmac = OpenSSL::HMAC.hexdigest('SHA256', secret, uri + text)
-      unless hmac_message == computed_hmac
-        return 401
+      # Text could either be sent to us from client, or could be nil in the case of a retrieval request:
+      text = params['text'] ? params['text'] : ''
+      # Now with all our parameters gathered, we can calculated HMAC and compare to what client sent us
+      computed_hmac = OpenSSL::HMAC.hexdigest('SHA256', secret, text + uri)
+      if hmac_message == computed_hmac
+        env['warden'].set_user(user)
+        return 200 # Success!
+      else
+        return 401 # Failed to Authenticate
       end
-      binding.pry
     else
-      return 401
+      return 401 # Failed to Authenticate
     end
   end
 end

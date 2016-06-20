@@ -4,8 +4,12 @@
 # Required Gems: curb
 # Required programs:
 
-SERVER = "localhost:9393/entry"
-#SERVER = "cammycorner.herokuapp.com/entry"
+# On application server we ask rack for the URI
+# and it includes http:// before
+# So we have to make sure it's the same or HMAC auth fails
+
+#SERVER = "http://localhost:9393/entry"
+SERVER = "http://cammycorner.herokuapp.com/entry"
 
 require 'curb'
 require 'openssl'
@@ -44,7 +48,6 @@ end
 # Now to construct the HMAC authentication.
 # The message to sign is our request body plus request path.
 message = input + SERVER
-#binding.pry
 signature = OpenSSL::HMAC.hexdigest('SHA256', secret, message)
 # Most authorization headers I've seen have some kind of identifier before
 # the key/pair, but the scheme for Sinatra I was following ommitted it.
