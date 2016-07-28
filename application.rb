@@ -138,6 +138,7 @@ class NoteQueue < Sinatra::Application
     user = env['warden'].user
     @api_key = user.api_key
     @api_secret = user.api_secret
+    @posts = user.entries.length
     erb :dash
   end
 
