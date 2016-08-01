@@ -115,7 +115,7 @@ class NoteQueue < Sinatra::Application
     user = env['warden'].user
     entries = Entry.all(:user_id => user.id)
     json_string = json(entries)
-    Entry.all.destroy
+    entries.destroy
     json_string
   end
 
