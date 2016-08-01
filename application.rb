@@ -98,6 +98,7 @@ class NoteQueue < Sinatra::Application
     authenticate
     stamp = Time.new
     # Message comes through with spaces on either side, remove them:
+    return 400 unless params['text']
     message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
     # We need user ID:
     user_id = env['warden'].user.id
@@ -176,6 +177,7 @@ class NoteQueue < Sinatra::Application
       key = header[1]
       hmac_message = header[2]
       user = User.first(api_key: key)
+      return 401 unless user
       secret = user.api_secret
       uri = env['REQUEST_URI']
       # Text could either be sent to us from client, or could be nil in the case of a retrieval request:
