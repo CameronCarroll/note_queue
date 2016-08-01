@@ -95,7 +95,8 @@ class NoteQueue < Sinatra::Application
   # Program API Routes:
 
   post '/entry' do
-    authenticate
+    error = authenticate_errors
+    return error if error
     stamp = Time.new
     # Message comes through with spaces on either side, remove them:
     return 400 unless params['text']
@@ -112,7 +113,8 @@ class NoteQueue < Sinatra::Application
   end
 
   delete '/entries' do
-    authenticate
+    error = authenticate_errors
+    return error if error
     user = env['warden'].user
     entries = Entry.all(:user_id => user.id)
     json_string = json(entries)
@@ -165,7 +167,9 @@ class NoteQueue < Sinatra::Application
     redirect '/' if logged_out?
   end
 
-  def authenticate
+  # Returns nil on success
+  # Returns appropriate error code otherwise
+  def authenticate_errors
     # Get HTTP_AUTHORIZATION header
     # This is set up by the client's request
     header = env["HTTP_AUTHORIZATION"]
@@ -186,7 +190,7 @@ class NoteQueue < Sinatra::Application
       computed_hmac = OpenSSL::HMAC.hexdigest('SHA256', secret, text + uri)
       if hmac_message == computed_hmac
         env['warden'].set_user(user)
-        return 200 # Success!
+        return nil # Success!
       else
         return 401 # Failed to Authenticate
       end
