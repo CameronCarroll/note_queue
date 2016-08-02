@@ -96,30 +96,36 @@ class NoteQueue < Sinatra::Application
 
   post '/entry' do
     error = authenticate_errors
-    return error if error
-    stamp = Time.new
-    # Message comes through with spaces on either side, remove them:
-    return 400 unless params['text']
-    message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
-    # We need user ID:
-    user_id = env['warden'].user.id
-    # I was having a lot of trouble here, where it just refused to create the record, but it seems I forgot to hook up the user_id, and because it belongs to a user it was failing.
-    result = Entry.create(:message => message , :datestamp => stamp, :user_id => user_id)
-    if result.id
-      return 201
+    if error
+      status error
     else
-      return 500
+      stamp = Time.new
+      # Message comes through with spaces on either side, remove them:
+      return 400 unless params['text']
+      message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
+      # We need user ID:
+      user_id = env['warden'].user.id
+      # I was having a lot of trouble here, where it just refused to create the record, but it seems I forgot to hook up the user_id, and because it belongs to a user it was failing.
+      result = Entry.create(:message => message , :datestamp => stamp, :user_id => user_id)
+      if result.id
+        status 201
+      else
+        status 500
+      end
     end
   end
 
   delete '/entries' do
     error = authenticate_errors
-    return error if error
-    user = env['warden'].user
-    entries = Entry.all(:user_id => user.id)
-    json_string = json(entries)
-    entries.destroy
-    json_string
+    if error
+      status error
+    else
+      user = env['warden'].user
+      entries = Entry.all(:user_id => user.id)
+      json_string = json(entries)
+      entries.destroy
+      json_string
+    end
   end
 
   #############################################################################
