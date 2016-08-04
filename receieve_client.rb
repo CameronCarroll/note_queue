@@ -16,7 +16,7 @@ require 'pry'
 # So we have to make sure it's the same or HMAC auth fails
 
 #SERVER = "http://localhost:9393/entries"
-SERVER = "http://cammycorner.herokuapp.com/entries"
+SERVER = "http://nqrb.herokuapp.com/entries"
 DOC_DIRECTORY = Dir.home + '/journal/'
 
 Dir.mkdir(DOC_DIRECTORY) unless Dir.exists?(DOC_DIRECTORY)

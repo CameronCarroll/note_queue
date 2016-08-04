@@ -9,7 +9,7 @@
 # So we have to make sure it's the same or HMAC auth fails
 
 #SERVER = "http://localhost:9393/entry"
-SERVER = "http://cammycorner.herokuapp.com/entry"
+SERVER = "http://nqrb.herokuapp.com/entry"
 
 require 'curb'
 require 'openssl'
