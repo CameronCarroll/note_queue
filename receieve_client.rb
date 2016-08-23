@@ -9,14 +9,11 @@ require 'time'
 require 'openssl'
 require_relative 'keylib'
 
-require 'pry'
-
 # On application server we ask rack for the URI
 # and it includes http:// before
 # So we have to make sure it's the same or HMAC auth fails
 
-#SERVER = "http://localhost:9393/entries"
-SERVER = "http://cammycorner.herokuapp.com/entries"
+SERVER = "http://nqrb.herokuapp.com/entries"
 DOC_DIRECTORY = Dir.home + '/journal/'
 
 Dir.mkdir(DOC_DIRECTORY) unless Dir.exists?(DOC_DIRECTORY)
@@ -26,7 +23,6 @@ Dir.mkdir(DOC_DIRECTORY) unless Dir.exists?(DOC_DIRECTORY)
 keys = NQKeylib.keys
 key = keys[0]
 secret = keys[1]
-
 
 # Using a DELETE request because we want to wipe out all data on the server and instead use receieve_client to aggregate data to its final destination.
 message = SERVER
