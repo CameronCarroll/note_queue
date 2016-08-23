@@ -97,6 +97,8 @@ class NoteQueue < Sinatra::Application
   post '/entry' do
     authenticate
     stamp = Time.new
+    #HAHAHAHAHA WHAT IF MESSAGE DOESNT COME THROUGH THE WAY WE EXPECT THOUGH
+    return 400 unless params['text']
     # Message comes through with spaces on either side, remove them:
     message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
     # We need user ID:
