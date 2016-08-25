@@ -95,31 +95,37 @@ class NoteQueue < Sinatra::Application
   # Program API Routes:
 
   post '/entry' do
-    binding.pry
-    authenticate
-    stamp = Time.new
-    #HAHAHAHAHA WHAT IF MESSAGE DOESNT COME THROUGH THE WAY WE EXPECT THOUGH
-    return 400 unless params['text']
-    # Message comes through with spaces on either side, remove them:
-    message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
-    # We need user ID:
-    user_id = env['warden'].user.id
-    # I was having a lot of trouble here, where it just refused to create the record, but it seems I forgot to hook up the user_id, and because it belongs to a user it was failing.
-    result = Entry.create(:message => message , :datestamp => stamp, :user_id => user_id)
-    if result.id
-      return 201
+    error = authenticate_errors
+    if error
+      status error
     else
-      return 500
+      stamp = Time.new
+      # Message comes through with spaces on either side, remove them:
+      return 400 unless params['text']
+      message = params['text'].sub(/^\s/, '').sub(/\s$/, '')
+      # We need user ID:
+      user_id = env['warden'].user.id
+      # I was having a lot of trouble here, where it just refused to create the record, but it seems I forgot to hook up the user_id, and because it belongs to a user it was failing.
+      result = Entry.create(:message => message , :datestamp => stamp, :user_id => user_id)
+      if result.id
+        status 201
+      else
+        status 500
+      end
     end
   end
 
   delete '/entries' do
-    authenticate
-    user = env['warden'].user
-    entries = Entry.all(:user_id => user.id)
-    json_string = json(entries)
-    Entry.all.destroy
-    json_string
+    error = authenticate_errors
+    if error
+      status error
+    else
+      user = env['warden'].user
+      entries = Entry.all(:user_id => user.id)
+      json_string = json(entries)
+      entries.destroy
+      json_string
+    end
   end
 
   #############################################################################
@@ -169,7 +175,9 @@ class NoteQueue < Sinatra::Application
     redirect '/' if logged_out?
   end
 
-  def authenticate
+  # Returns nil on success
+  # Returns appropriate error code otherwise
+  def authenticate_errors
     # Get HTTP_AUTHORIZATION header
     # This is set up by the client's request
     header = env["HTTP_AUTHORIZATION"]
@@ -181,6 +189,7 @@ class NoteQueue < Sinatra::Application
       key = header[1]
       hmac_message = header[2]
       user = User.first(api_key: key)
+      return 401 unless user
       secret = user.api_secret
       uri = env['REQUEST_URI']
       # Text could either be sent to us from client, or could be nil in the case of a retrieval request:
@@ -189,12 +198,12 @@ class NoteQueue < Sinatra::Application
       computed_hmac = OpenSSL::HMAC.hexdigest('SHA256', secret, text + uri)
       if hmac_message == computed_hmac
         env['warden'].set_user(user)
-        return # Success!
+        return nil # Success!
       else
-        halt 401 # Failed to Authenticate
+        return 401 # Failed to Authenticate
       end
     else
-      halt 401 # Failed to Authenticate
+      return 401 # Failed to Authenticate
     end
   end
 end
