@@ -95,6 +95,7 @@ class NoteQueue < Sinatra::Application
   # Program API Routes:
 
   post '/entry' do
+    binding.pry
     authenticate
     stamp = Time.new
     #HAHAHAHAHA WHAT IF MESSAGE DOESNT COME THROUGH THE WAY WE EXPECT THOUGH
@@ -140,6 +141,7 @@ class NoteQueue < Sinatra::Application
     user = env['warden'].user
     @api_key = user.api_key
     @api_secret = user.api_secret
+    @auth_string = "Authorization: #{@api_key}:#{@api_secret}"
     @posts = user.entries.length
     erb :dash
   end
@@ -187,12 +189,12 @@ class NoteQueue < Sinatra::Application
       computed_hmac = OpenSSL::HMAC.hexdigest('SHA256', secret, text + uri)
       if hmac_message == computed_hmac
         env['warden'].set_user(user)
-        return 200 # Success!
+        return # Success!
       else
-        return 401 # Failed to Authenticate
+        halt 401 # Failed to Authenticate
       end
     else
-      return 401 # Failed to Authenticate
+      halt 401 # Failed to Authenticate
     end
   end
 end

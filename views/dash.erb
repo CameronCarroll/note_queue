@@ -2,3 +2,15 @@
 Your api key is: <%= @api_key %> <br />
 Your api secret is: <%= @api_secret %> <br />
 There are <%= @posts %> messages waiting to be downloaded.
+<br />
+<br />
+<div class="well">
+  <form id="form" action='/entry' method='POST'>
+    <div class="form-group">
+      <label for="inputText">Text</label>
+      <input type="text" class="form-control" id="inputText" placeholder="Enter Text" name="text" required autofocus>
+    </div>
+
+    <button class="btn btn-lg btn-success btn-block" type="submit">Add Message</button>
+  </form>
+</div>
